@@ -1,4 +1,7 @@
-import { listExercises, listWorkouts } from "../services/workoutServices.js";
+import {
+  listWorkoutExercises,
+  listWorkouts,
+} from "../services/workoutServices.js";
 // Makes sense to use the query paramters for the lists eg list?status=pending
 
 export const testWorkouts = async (req, res) => {
@@ -20,12 +23,13 @@ export const testWorkouts = async (req, res) => {
 
 export const testExercises = async (req, res) => {
   try {
-    const response = await listExercises();
+    const result = await listWorkoutExercises();
     if (result.length === 0 || !result) {
       return res
         .status(400)
         .json({ error: "Not able to find any data from database" });
     }
+    console.log("result", result);
 
     res.status(200).json(result);
   } catch (err) {

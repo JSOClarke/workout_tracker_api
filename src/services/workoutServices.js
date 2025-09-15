@@ -10,20 +10,34 @@ export const listWorkouts = async (req, res) => {
   }
 };
 
-export const listExercises = async (req, res) => {
-  const excercise_id = `SELECT * FROM workout_exercises WHERE user_id=$1 AND workout_id=$2 RETURNING exercise_id`;
-  const query = `SELECT * FROM exercise WHERE user_id=$1 AND exercise_id=$2`;
-
+export const listWorkoutExercises = async (req, res) => {
+  let response = [];
+  const query = `SELECT exercise_id FROM workout_exercises WHERE workout_id=$1`;
   try {
-    const ex_id = await pool.query(excercise_id, [USER_ID, WORKOUT_ID]);
-    if (!ex_id) {
-      throw new Error("No Workout Exercises found for the given workout ID");
+    const result = await pool.query(query, [process.env.WORKOUT_ID]);
+    if (result.rowCount === 0) {
+      throw new Error("No exercise found");
     }
-    const result = await pool.query(query, [USER_ID, ex_id]);
-    return result.rows;
+    for (let i = 0; i < result.rowCount; i++) {
+      const ex = await findExercise(result.rows[i].exercise_id);
+
+      response.push(ex);
+    }
+
+    return response;
   } catch (err) {
     return err;
   }
   // RETURNING THE exercise ID which we will then do a search for
   // so we need to fist take in the workout_id.
+};
+
+export const findExercise = async (exercise_id) => {
+  const query = `SELECT * FROM exercises WHERE exercise_id=$1`;
+  try {
+    const result = await pool.query(query, [exercise_id]);
+    return result.rows;
+  } catch (err) {
+    return err;
+  }
 };
