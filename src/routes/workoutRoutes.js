@@ -1,16 +1,13 @@
 import express from "express";
-import {
-  deleteWorkout,
-  listWorkExercises,
-  listWorkouts,
-} from "../controllers/workoutControllers.js";
+import * as workoutController from "../controllers/workoutControllers.js";
 const routes = express.Router();
 
-// LIST Workouts
+routes.get("/workouts", workoutController.listWorkouts);
+routes.delete("/workouts", workoutController.deleteWorkout);
+routes.post("/workouts", workoutController.addWorkout);
+routes.get("workouts", workoutController.listWorkByStatus);
 
-// routes.get("/list", listWorkouts);
-routes.get("/workouts", listWorkouts);
-routes.get("/exercises", listWorkExercises);
-routes.delete("/workouts", deleteWorkout);
-
+routes.get("/exercises", workoutController.listWorkExercises);
+routes.post("/exercises", workoutController.addWorkoutExercises);
+routes.post("/exercise/set", workoutController.addExerciseSets);
 export default routes;

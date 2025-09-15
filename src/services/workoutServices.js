@@ -1,13 +1,15 @@
 import pool from "../config/db.js";
 
-export const gatherWorkouts = async (req, res) => {
-  try {
-    const query = `SELECT * FROM workouts WHERE user_id=$1`;
-    const result = await pool.query(query, [process.env.USER_ID]);
-    return result.rows;
-  } catch (err) {
-    return err;
-  }
+export const gatherWorkouts = async (user_id) => {
+  const query = `SELECT * FROM workouts WHERE user_id=$1`;
+  const result = await pool.query(query, [user_id]);
+  return result.rows;
+};
+
+export const gatherWorkoutsByStatus = async (user_id, status) => {
+  const query = `SELECT * FROM workouts WHERE user_id=$1 AND status=$2`;
+  const result = await pool.query(query, [user_id, status]);
+  return result.rows;
 };
 
 export const gatherWorkExercises = async (workout_id) => {
@@ -44,6 +46,37 @@ export const deleteWorkoutById = async (workout_id) => {
   return result;
 };
 
-// export const findSets = async () => {
-//   const query = `SELECT * from sets WHERE`;
-// };
+export const createWorkout = async (user_id, scheduled_date) => {
+  const query = `INSERT INTO workouts (user_id,scheduled_date) VALUES ($1,$2) RETURNING *`;
+  const result = await pool.query(query, [user_id, scheduled_date]);
+  return result.rows;
+};
+
+export const createWorkoutExercise = async (
+  workout_id,
+  exercise_id,
+  order_in
+) => {
+  const query = `INSERT INTO workouts_exercises (workout_id,exercise_id,order_in) VALUES ($1,$2) RETURNING *`;
+  const result = await pool.query(query, [workout_id, exercise_id, order_in]);
+  return result.rows;
+};
+
+export const createExerciseSet = async (
+  workout_exercise_id,
+  reps,
+  weight,
+  comment = ""
+) => {
+  const query = `INSERT INTO sets (   workout_exercise_id,
+      reps,
+      weight,
+      comment) VALUES ($1,$2) RETURNING *`;
+  const result = await pool.query(query, [
+    workout_exercise_id,
+    reps,
+    weight,
+    comment,
+  ]);
+  return result.rows;
+};
