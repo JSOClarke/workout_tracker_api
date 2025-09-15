@@ -53,10 +53,21 @@ export const findExercise = async (exercise_id) => {
   }
 };
 
-// export const deleteWorkout = async()=>{
-//     const query = `TRUNCATE`
-// }
+export const deleteWorkout = async (req, res) => {
+  const { workout_id } = req.query;
+  if (!workout_id) {
+    throw new Error("The passed wuery parameter is undefined");
+  }
 
-// export const findSets = async () => {
-//   const query = `SELECT * from sets WHERE`;
-// };
+  const query = `DELETE FROM workout WHERE workout_id=$1`;
+  try {
+    const result = await pool.query(query, [workout_id]);
+    return result.rows;
+  } catch (err) {
+    return err;
+  }
+};
+
+export const findSets = async () => {
+  const query = `SELECT * from sets WHERE`;
+};

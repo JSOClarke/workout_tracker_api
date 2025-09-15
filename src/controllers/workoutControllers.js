@@ -37,3 +37,20 @@ export const testExercises = async (req, res) => {
     res.status(404).json({ error: "No exercises found" });
   }
 };
+
+export const deleteWorkout = async (req, res) => {
+  try {
+    const result = await deleteWorkout();
+    if (result.length === 0 || !result) {
+      return res
+        .status(400)
+        .json({ error: "Not able to find any data from database" });
+    }
+    console.log("result", result);
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ error: "No exercises found" });
+  }
+};
