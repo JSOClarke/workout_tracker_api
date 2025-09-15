@@ -11,20 +11,31 @@ export const listWorkouts = async (req, res) => {
 };
 
 export const listWorkoutExercises = async (req, res) => {
-  let response = [];
-  const query = `SELECT exercise_id FROM workout_exercises WHERE workout_id=$1`;
+  //   let response = [];
+  const query = `SELECT 
+  w.workout_id,
+  w.scheduled_date,
+  e.name AS exercise_name,
+  s.reps,
+  s.weight,
+  we.order_in
+FROM workouts w
+JOIN workout_exercises we ON w.workout_id = we.workout_id
+JOIN sets s ON we.workout_exercise_id = s.workout_exercise_id
+JOIN exercises e ON we.exercise_id = e.exercise_id
+WHERE w.workout_id = $1`;
   try {
     const result = await pool.query(query, [process.env.WORKOUT_ID]);
     if (result.rowCount === 0) {
       throw new Error("No exercise found");
     }
-    for (let i = 0; i < result.rowCount; i++) {
-      const ex = await findExercise(result.rows[i].exercise_id);
+    // for (let i = 0; i < result.rowCount; i++) {
+    //   const ex = await findExercise(result.rows[i].exercise_id);
 
-      response.push(ex);
-    }
+    //   response.push(ex);
+    // }
 
-    return response;
+    return result.rows;
   } catch (err) {
     return err;
   }
@@ -41,3 +52,11 @@ export const findExercise = async (exercise_id) => {
     return err;
   }
 };
+
+// export const deleteWorkout = async()=>{
+//     const query = `TRUNCATE`
+// }
+
+// export const findSets = async () => {
+//   const query = `SELECT * from sets WHERE`;
+// };
