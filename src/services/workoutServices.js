@@ -57,7 +57,7 @@ export const createWorkoutExercise = async (
   exercise_id,
   order_in
 ) => {
-  const query = `INSERT INTO workouts_exercises (workout_id,exercise_id,order_in) VALUES ($1,$2) RETURNING *`;
+  const query = `INSERT INTO workout_exercises (workout_id,exercise_id,order_in) VALUES ($1,$2,$3) RETURNING *`;
   const result = await pool.query(query, [workout_id, exercise_id, order_in]);
   return result.rows;
 };
@@ -68,10 +68,10 @@ export const createExerciseSet = async (
   weight,
   comment = ""
 ) => {
-  const query = `INSERT INTO sets (   workout_exercise_id,
+  const query = `INSERT INTO sets (workout_exercise_id,
       reps,
       weight,
-      comment) VALUES ($1,$2) RETURNING *`;
+      comment) VALUES ($1,$2,$3,$4) RETURNING *`;
   const result = await pool.query(query, [
     workout_exercise_id,
     reps,

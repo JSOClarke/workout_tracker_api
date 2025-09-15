@@ -9,5 +9,6 @@ routes.get("/workouts/status", workoutController.listWorkoutsByStatus);
 
 routes.get("/exercises", workoutController.listWorkExercises);
 routes.post("/exercises", workoutController.addWorkoutExercises);
-routes.post("/exercise/set", workoutController.addExerciseSets);
+
+routes.post("/exercises/set", workoutController.addExerciseSets);
 export default routes;

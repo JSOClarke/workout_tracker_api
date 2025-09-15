@@ -104,12 +104,13 @@ export const addWorkout = async (req, res) => {
 
 export const addWorkoutExercises = async (req, res) => {
   const { workout_id, excerise_id, order_in } = req.body;
+  const numeric_workout_id = Number(workout_id);
+  const numeric_excerise_id = Number(excerise_id);
 
   try {
     const result = await workoutService.createWorkoutExercise(
-      process.env.USER_ID,
-      workout_id,
-      excerise_id,
+      numeric_workout_id,
+      numeric_excerise_id,
       order_in
     );
     if (result.rowCount == 0) {
