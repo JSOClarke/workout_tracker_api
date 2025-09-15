@@ -1,14 +1,16 @@
 import express from "express";
 import {
-  testExercises,
-  testWorkouts,
+  deleteWorkout,
+  listWorkExercises,
+  listWorkouts,
 } from "../controllers/workoutControllers.js";
 const routes = express.Router();
 
 // LIST Workouts
 
 // routes.get("/list", listWorkouts);
-routes.get("/list/workouts", testWorkouts);
-routes.get("/list/exercises", testExercises);
+routes.get("/workouts", listWorkouts);
+routes.get("/exercises", listWorkExercises);
+routes.delete("/workouts", deleteWorkout);
 
 export default routes;
