@@ -6,7 +6,8 @@ dotenv.config();
 
 const app = express();
 
-app.use("/", workoutRoutes, express.json());
+app.use(express.json());
+app.use("/", workoutRoutes);
 
 app.listen(process.env.PORT, () =>
   console.log("Server is up on PORT: ", process.env.PORT)

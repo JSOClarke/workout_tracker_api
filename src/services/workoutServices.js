@@ -6,9 +6,9 @@ export const gatherWorkouts = async (user_id) => {
   return result.rows;
 };
 
-export const gatherWorkoutsByStatus = async (user_id, status) => {
-  const query = `SELECT * FROM workouts WHERE user_id=$1 AND status=$2`;
-  const result = await pool.query(query, [user_id, status]);
+export const gatherWorkoutsByStatus = async (user_id, boolean_is_completed) => {
+  const query = `SELECT * FROM workouts WHERE user_id=$1 AND is_completed=$2`;
+  const result = await pool.query(query, [user_id, boolean_is_completed]);
   return result.rows;
 };
 

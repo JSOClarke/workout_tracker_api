@@ -35,10 +35,15 @@ export const listWorkExercises = async (req, res) => {
   }
 };
 
-export const listWorkByStatus = async (req, res) => {
-  const { status } = req.query;
+export const listWorkoutsByStatus = async (req, res) => {
+  const { is_completed } = req.query;
+
+  const boolean_is_completed = is_completed === "true" ? true : false;
   try {
-    const result = await workoutService.gatherWorkoutsByStatus(user_id, status);
+    const result = await workoutService.gatherWorkoutsByStatus(
+      process.env.USER_ID,
+      boolean_is_completed
+    );
     if (result.length === 0) {
       return res
         .status(200)
