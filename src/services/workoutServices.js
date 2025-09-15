@@ -30,16 +30,6 @@ WHERE w.workout_id = $1`;
   return result.rows;
 };
 
-export const findExercise = async (exercise_id) => {
-  const query = `SELECT * FROM exercises WHERE exercise_id=$1`;
-  try {
-    const result = await pool.query(query, [exercise_id]);
-    return result.rows;
-  } catch (err) {
-    return err;
-  }
-};
-
 export const deleteWorkoutById = async (workout_id) => {
   const query = `DELETE FROM workouts WHERE workout_id=$1`;
   const result = await pool.query(query, [workout_id]);
