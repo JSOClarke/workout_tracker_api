@@ -17,6 +17,10 @@ export const hashPassword = async (password) => {
   return await bcrypt.hash(password, salt);
 };
 
+export const isPasswordCorrect = async (hashed_password, plain_password) => {
+  return await bcrypt.compare(plain_password, hashed_password);
+};
+
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -26,7 +30,7 @@ export const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(saltRounds);
     // gives you a random string
     console.log(salt);
-    const password_hash = await bcrypt.hash(password, salt);
+    const password_hash = await hashPassword(password);
 
     console.log(password_hash);
     // res.status(200).json({ message: "Succesfully salted and hashed" });
@@ -61,13 +65,9 @@ export const login = async (req, res) => {
     }
     console.log("result", result);
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      result.password_hash
-    );
-    console.log("isPasswordCorrect", isPasswordCorrect);
+    const isMatch = await isPasswordCorrect(password, result.password_hash);
 
-    if (!isPasswordCorrect) {
+    if (!isMatch) {
       return res.status(404).json({ message: "Invalid password" });
     }
     const token = createJWT(result.user_id, result.email);

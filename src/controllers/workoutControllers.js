@@ -1,12 +1,4 @@
-import bcrypt from "bcrypt";
 import * as workoutService from "../services/workoutServices.js";
-import jwt from "jsonwebtoken";
-
-const createJWT = (user_id, email) => {
-  return jwt.sign({ sub: user_id, email: email }, process.env.JWT_SECRET, {
-    expiresIn: "4h",
-  });
-};
 
 export const testDBConnection = async (req, res) => {
   try {
