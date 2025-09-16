@@ -4,16 +4,30 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "test": "node --experimental-vm-modules node_modules/.bin/jest --watchAll",
+    "server": "node ./src/app.js "
   },
   "keywords": [],
   "author": "",
+  "transform": {
+    "^.+\\.js$": "babel-jest"
+  },
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "express-unless": "^2.1.3",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "babel-jest": "^30.1.2",
+    "jest": "^30.1.3",
+    "supertest": "^7.1.4"
   }
 }

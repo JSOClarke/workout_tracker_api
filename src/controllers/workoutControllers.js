@@ -1,5 +1,12 @@
-import pool from "../config/db.js";
+import bcrypt from "bcrypt";
 import * as workoutService from "../services/workoutServices.js";
+import jwt from "jsonwebtoken";
+
+const createJWT = (user_id, email) => {
+  return jwt.sign({ sub: user_id, email: email }, process.env.JWT_SECRET, {
+    expiresIn: "4h",
+  });
+};
 
 export const testDBConnection = async (req, res) => {
   try {
@@ -12,75 +19,86 @@ export const testDBConnection = async (req, res) => {
 };
 
 export const listWorkouts = async (req, res) => {
-  try {
-    const result = await workoutService.gatherWorkouts(); // returns the rows so should be a array of objects i believe
-    if (result.length === 0 || !result) {
-      return res.status(200).json({});
-    }
-
-    res.status(200).json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(404).json({ error: err.message });
-  }
-};
-
-export const listWorkExercises = async (req, res) => {
-  const { workout_id } = req.query;
-  try {
-    const result = await workoutService.gatherWorkExercises(workout_id);
-    if (result.length === 0) {
-      return res
-        .status(200)
-        .json({ data: "No workout_exercises Data found inside of workout" });
-    }
-    console.log("result", result);
-
-    res.status(200).json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(404).json({ error: err.message });
-  }
-};
-
-export const listWorkoutsByStatus = async (req, res) => {
+  let result;
+  const { sub } = req.user;
   const { is_completed } = req.query;
-
-  const boolean_is_completed = is_completed === "true" ? true : false;
+  console.log(typeof is_completed);
   try {
-    const result = await workoutService.gatherWorkoutsByStatus(
-      process.env.USER_ID,
-      boolean_is_completed
-    );
-    if (result.length === 0) {
-      return res
-        .status(200)
-        .json({ data: "No workout found with that criteria" });
+    if (typeof is_completed !== "undefined") {
+      const boolean_is_completed = is_completed === "true";
+      console.log("boolean_is_completed", boolean_is_completed);
+      result = await workoutService.gatherWorkoutsByStatus(
+        sub,
+        boolean_is_completed
+      );
+    } else {
+      console.log("All runs");
+      result = await workoutService.gatherWorkouts(sub); // returns the rows so should be a array of objects i believe
+    }
+    res.status(200).json(result || []);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const listWorkoutExercises = async (req, res) => {
+  const { sub } = req.user;
+  const { workout_id } = req.params;
+
+  try {
+    const result = await workoutService.gatherWorkExercises(workout_id, sub);
+    if (!result || result.length === 0) {
+      return res.status(200).json([]);
     }
     console.log("result", result);
 
     res.status(200).json(result);
   } catch (err) {
     console.error(err);
-    res.status(404).json({ error: err.message });
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const listExerciseWithSets = async (req, res) => {
+  const { sub } = req.user;
+  const { workout_exercise_id } = req.params;
+  console.log("workout_exercise_id", workout_exercise_id);
+
+  try {
+    const result = await workoutService.gatherExerciseWithSets(
+      sub,
+      workout_exercise_id
+    );
+    console.log("result", result);
+    if (!result || result.length === 0) {
+      return res.status(200).json([]);
+    }
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
 export const deleteWorkout = async (req, res) => {
+  const { sub } = req.user;
   const { workout_id } = req.query;
 
   const numerical_workout_id = Number(workout_id);
 
   try {
-    const result = await workoutService.deleteWorkoutById(numerical_workout_id);
+    const result = await workoutService.deleteWorkoutById(
+      numerical_workout_id,
+      sub
+    );
 
-    if (result.rowCount == 0) {
+    if (result.length == 0) {
       return res.status(400).json({
         error:
           "Workout Was not deleted by db query went through and didnt error",
       });
     }
-    // if there were any errors it would push to the catch book auto without needing to return a err from the service
     console.log("result", result);
 
     res.status(200).send("Succefully removed the workout");
@@ -91,13 +109,11 @@ export const deleteWorkout = async (req, res) => {
 };
 
 export const addWorkout = async (req, res) => {
+  const { sub } = req.user;
   const { scheduled_date } = req.body;
 
   try {
-    const result = await workoutService.createWorkout(
-      process.env.USER_ID,
-      scheduled_date
-    );
+    const result = await workoutService.createWorkout(sub, scheduled_date);
     if (result.rowCount == 0) {
       return res.status(400).send("DB couldnt insert the workout");
     }
@@ -121,14 +137,12 @@ export const addWorkoutExercises = async (req, res) => {
       numeric_excerise_id,
       order_in
     );
-    if (result.rowCount == 0) {
+    if (!result || result.length === 0) {
       return res
         .status(400)
         .send("DB not able to create work exercise query but no error");
     }
-    res
-      .status(200)
-      .send("Sucesfully added the exercise send back the ID next time tho");
+    res.status(200).json(result);
   } catch (err) {
     console.error(err);
     res.status(404).json({ error: err.message });
@@ -145,14 +159,12 @@ export const addExerciseSets = async (req, res) => {
       weight,
       comment
     );
-    if (result.rowCount == 0) {
+    if (!result || result.length === 0) {
       return res
         .status(400)
         .send("DB not able to create set query but no error");
     }
-    res
-      .status(200)
-      .send("Sucesfully added the  set send back the ID next time tho");
+    res.status(200).json(result);
   } catch (err) {
     console.error(err);
     res.status(404).json({ error: err.message });
@@ -180,3 +192,5 @@ export const deleteWorkoutExercise = async (req, res) => {
 };
 
 const generateReport = async (req, res) => {};
+
+// jwt will basically sign the payload with a key that you can store in cookies

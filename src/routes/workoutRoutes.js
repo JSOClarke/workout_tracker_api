@@ -2,15 +2,18 @@ import express from "express";
 import * as workoutController from "../controllers/workoutControllers.js";
 const routes = express.Router();
 
-routes.get("/workouts", workoutController.listWorkouts);
-routes.delete("/workouts", workoutController.deleteWorkout);
-routes.post("/workouts", workoutController.addWorkout);
-routes.get("/workouts/status", workoutController.listWorkoutsByStatus);
+routes.get("/", workoutController.listWorkouts);
+routes.get("/:workout_id", workoutController.listWorkoutExercises);
+routes.delete("/", workoutController.deleteWorkout);
+routes.post("/", workoutController.addWorkout);
 
 routes.get("/health", workoutController.testDBConnection);
 
-routes.get("/exercises", workoutController.listWorkExercises);
 routes.post("/exercises", workoutController.addWorkoutExercises);
+routes.get(
+  "/exercises/:workout_exercise_id",
+  workoutController.listExerciseWithSets
+);
 routes.delete("/exercises", workoutController.deleteWorkoutExercise);
 
 routes.post("/exercises/set", workoutController.addExerciseSets);
