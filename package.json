@@ -4,14 +4,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-  "test": "node --experimental-vm-modules node_modules/.bin/jest --watchAll",
-    "server": "node ./src/app.js "
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
   },
   "keywords": [],
   "author": "",
-  "transform": {
-    "^.+\\.js$": "babel-jest"
-  },
   "license": "ISC",
   "description": "",
   "dependencies": {
