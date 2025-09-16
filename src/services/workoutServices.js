@@ -1,8 +1,14 @@
 import pool from "../config/db.js";
 
+export const testDb = async () => {
+  const query = `SELECT 1`;
+  const result = await pool.query(query);
+  return result.rows[0];
+};
+
 export const gatherWorkouts = async (user_id) => {
   const query = `SELECT * FROM workouts WHERE user_id=$1`;
-  const result = await pool.query(query, [user_id]);
+  const result = await pool.query(query, [process.env.USER_ID]);
   return result.rows;
 };
 
@@ -31,15 +37,22 @@ WHERE w.workout_id = $1`;
 };
 
 export const deleteWorkoutById = async (workout_id) => {
-  const query = `DELETE FROM workouts WHERE workout_id=$1`;
+  const query = `DELETE FROM workouts WHERE workout_id=$1 RETURNING workout_id`;
   const result = await pool.query(query, [workout_id]);
-  return result;
+  return result.result[0];
+};
+
+export const deleteWorkoutExerciseById = async (workout_exercise_id) => {
+  const query =
+    "DELETE FROM workout_exercises WHERE workout_exercise_id = $1 RETURNING workout_exercise_id";
+  const result = await pool.query(query, [workout_exercise_id]);
+  return result.rows[0];
 };
 
 export const createWorkout = async (user_id, scheduled_date) => {
   const query = `INSERT INTO workouts (user_id,scheduled_date) VALUES ($1,$2) RETURNING *`;
   const result = await pool.query(query, [user_id, scheduled_date]);
-  return result.rows;
+  return result.rows[0];
 };
 
 export const createWorkoutExercise = async (
@@ -49,7 +62,7 @@ export const createWorkoutExercise = async (
 ) => {
   const query = `INSERT INTO workout_exercises (workout_id,exercise_id,order_in) VALUES ($1,$2,$3) RETURNING *`;
   const result = await pool.query(query, [workout_id, exercise_id, order_in]);
-  return result.rows;
+  return result.rows[0];
 };
 
 export const createExerciseSet = async (
@@ -68,5 +81,5 @@ export const createExerciseSet = async (
     weight,
     comment,
   ]);
-  return result.rows;
+  return result.rows[0];
 };

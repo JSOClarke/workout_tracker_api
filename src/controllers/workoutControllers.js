@@ -1,13 +1,21 @@
+import pool from "../config/db.js";
 import * as workoutService from "../services/workoutServices.js";
-// Makes sense to use the query paramters for the lists eg list?status=pending
+
+export const testDBConnection = async (req, res) => {
+  try {
+    const response = await workoutService.testDb();
+    res.status(200).send("Succesfull connection to the database");
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+};
 
 export const listWorkouts = async (req, res) => {
   try {
     const result = await workoutService.gatherWorkouts(); // returns the rows so should be a array of objects i believe
     if (result.length === 0 || !result) {
-      return res
-        .status(400)
-        .json({ error: "Not able to find any data from database" });
+      return res.status(200).json({});
     }
 
     res.status(200).json(result);
@@ -145,6 +153,26 @@ export const addExerciseSets = async (req, res) => {
     res
       .status(200)
       .send("Sucesfully added the  set send back the ID next time tho");
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ error: err.message });
+  }
+};
+
+export const deleteWorkoutExercise = async (req, res) => {
+  const { workout_exercise_id } = req.query;
+
+  const numerical_workout_exercise_id = Number(workout_exercise_id);
+
+  try {
+    const result = await workoutService.deleteWorkoutExerciseById(
+      numerical_workout_exercise_id
+    );
+
+    // if there were any errors it would push to the catch book auto without needing to return a err from the service
+    console.log("result", result);
+
+    res.status(200).json(result);
   } catch (err) {
     console.error(err);
     res.status(404).json({ error: err.message });

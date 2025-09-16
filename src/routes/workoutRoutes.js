@@ -7,8 +7,12 @@ routes.delete("/workouts", workoutController.deleteWorkout);
 routes.post("/workouts", workoutController.addWorkout);
 routes.get("/workouts/status", workoutController.listWorkoutsByStatus);
 
+routes.get("/health", workoutController.testDBConnection);
+
 routes.get("/exercises", workoutController.listWorkExercises);
 routes.post("/exercises", workoutController.addWorkoutExercises);
+routes.delete("/exercises", workoutController.deleteWorkoutExercise);
 
 routes.post("/exercises/set", workoutController.addExerciseSets);
+
 export default routes;
