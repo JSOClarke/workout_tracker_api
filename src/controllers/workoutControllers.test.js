@@ -144,19 +144,9 @@ describe("Workout Controllers", () => {
     controllerTest({
       controller: workoutControllers.deleteWorkout,
       mockService: workoutService.deleteWorkoutById,
-      mockValue: [1, 2],
+      mockValue: { workout_id: 1 },
       expectedStatus: 200,
-      reqProps: { query: { workout_id: 1 } },
-    })
-  );
-  test(
-    "deleteWorkout returns 404 when no content found",
-    controllerTest({
-      controller: workoutControllers.deleteWorkout,
-      mockService: workoutService.deleteWorkoutById,
-      mockValue: [],
-      expectedStatus: 404,
-      expectedJson: { error: "No content found" },
+      expectedJson: { workout_id: 1 },
       reqProps: { query: { workout_id: 1 } },
     })
   );
@@ -179,24 +169,12 @@ describe("Workout Controllers", () => {
     controllerTest({
       controller: workoutControllers.addWorkout,
       mockService: workoutService.createWorkout,
-      mockValue: [1],
+      mockValue: { workout_id: 1 },
       expectedStatus: 200,
+      expectedJson: { workout_id: 1 },
       reqProps: { body: { scheduled_date: "2025-09-17" } },
     })
   );
-
-  //   test(
-  //   "addWorkout returns 404 on no content found",
-  //   controllerTest({
-  //     controller: workoutControllers.addWorkout,
-  //     mockService: workoutService.createWorkout,
-  //     mockValue: new Error("Insert Fail"),
-  //     expectedStatus: 404,
-  //     expectedJson: { error: "Insert Fail" },
-  //     reqProps: { body: { scheduled_date: "2025-09-17" } },
-  //     reject: true,
-  //   })
-  // );
 
   test(
     "addWorkout returns 500 on failure",

@@ -24,57 +24,54 @@ export const isPasswordCorrect = async (hashed_password, plain_password) => {
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
-  const saltRounds = 10;
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ error: "No name,email or password provided" });
+  }
 
   try {
-    const salt = await bcrypt.genSalt(saltRounds);
-    // gives you a random string
-    console.log(salt);
     const password_hash = await hashPassword(password);
 
-    console.log(password_hash);
-    // res.status(200).json({ message: "Succesfully salted and hashed" });
-
     const result = await userServices.createSignup(name, email, password_hash);
-    console.log("result", result);
 
-    if (res.length === 0) {
+    if (!result || !result.user_id) {
       return res
-        .status(200)
-        .json({ message: "No DB error but user not inserted" });
+        .status(500)
+        .json({ error: "User has not been added to email" });
     }
 
     const token = createJWT(result.user_id, result.email);
 
-    res.status(200).json({ jwt: token });
+    res.status(200).json({ token: token });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(404).json({ error: "No email or Password provided" });
+  }
+
   try {
     const result = await userServices.getUser(email);
-    if (result.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No user found with the provided email address" });
+    if (!result || !result.user_id) {
+      return res.status(500).json({ error: "No user returned from database" });
     }
-    console.log("result", result);
 
     const isMatch = await bcrypt.compare(password, result.password_hash);
-    console.log("ismatch", isMatch);
 
     if (!isMatch) {
-      return res.status(404).json({ message: "Invalid password" });
+      return res.status(500).json({ message: "Invalid password" });
     }
     const token = createJWT(result.user_id, result.email);
-    res.status(200).json({ jwt: token });
+    res.status(200).json({ token: token });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };

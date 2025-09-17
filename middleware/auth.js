@@ -6,7 +6,7 @@ export const authMiddleware = (req, res, next) => {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(400).json({ message: "Invalid Token" });
+    return res.status(400).json({ message: "Invalid Token provided" });
   }
 
   try {

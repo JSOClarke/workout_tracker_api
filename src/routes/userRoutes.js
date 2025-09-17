@@ -4,7 +4,7 @@ const routes = express.Router();
 
 //UNPROTECTED ROUTES
 
-routes.get("/login", userController.login);
-routes.get("/signup", userController.signup);
+routes.post("/login", userController.login);
+routes.post("/signup", userController.signup);
 
 export default routes;

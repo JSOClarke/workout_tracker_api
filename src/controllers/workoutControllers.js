@@ -1,6 +1,12 @@
 import * as workoutService from "../services/workoutServices.js";
 
-import logger from "../config/logger.js";
+const checkParamIsNum = (param) => {
+  const numeric_param = Number(param);
+  if (isNaN(numeric_param)) {
+    throw new Error("Invalid Param");
+  }
+  return numeric_param;
+};
 
 export const testDBConnection = async (req, res) => {
   try {
@@ -16,6 +22,7 @@ export const listWorkouts = async (req, res) => {
   let result;
   const { sub } = req.user;
   const { is_completed } = req.query;
+
   console.log(typeof is_completed);
   try {
     if (typeof is_completed !== "undefined") {
@@ -40,6 +47,10 @@ export const listWorkoutExercises = async (req, res) => {
   const { sub } = req.user;
   const { workout_id } = req.params;
 
+  if (!workout_id) {
+    return res.status(404).json({ error: "No workout_id provided as param" });
+  }
+
   try {
     const result = await workoutService.gatherWorkExercises(workout_id, sub);
     if (!result || result.length === 0) {
@@ -57,14 +68,19 @@ export const listWorkoutExercises = async (req, res) => {
 export const listExerciseWithSets = async (req, res) => {
   const { sub } = req.user;
   const { workout_exercise_id } = req.params;
-  console.log("workout_exercise_id", workout_exercise_id);
+
+  if (!workout_exercise_id) {
+    return res
+      .status(404)
+      .json({ error: "No workout_exercise_id provided as param" });
+  }
 
   try {
     const result = await workoutService.gatherExerciseWithSets(
       sub,
       workout_exercise_id
     );
-    console.log("result", result);
+
     if (!result || result.length === 0) {
       return res.status(200).json([]);
     }
@@ -79,7 +95,15 @@ export const deleteWorkout = async (req, res) => {
   const { sub } = req.user;
   const { workout_id } = req.query;
 
-  const numerical_workout_id = Number(workout_id);
+  if (!workout_id) {
+    return res.status(404).json({ error: "No workout_id provided as param" });
+  }
+
+  const numerical_workout_id = checkParamIsNum(workout_id);
+
+  if (isNaN(numerical_workout_id)) {
+    res.status(404).json({ error: "Invalid workout ID type provided" });
+  }
 
   try {
     const result = await workoutService.deleteWorkoutById(
@@ -87,15 +111,15 @@ export const deleteWorkout = async (req, res) => {
       sub
     );
 
-    if (result.length == 0) {
-      return res.status(404).json({
-        error: "No content found",
+    if (!result.workout_id) {
+      return res.status(500).json({
+        error: "Workout not deleted from database",
       });
     }
-    console.log("result length", result.length);
-    console.log("result", result);
+    // console.log("result length", result.length);
+    // console.log("result", result);
 
-    res.status(200).send("Succefully removed the workout");
+    res.status(200).json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -108,12 +132,10 @@ export const addWorkout = async (req, res) => {
 
   try {
     const result = await workoutService.createWorkout(sub, scheduled_date);
-    if (result.length == 0) {
-      return res.status(400).send("DB couldnt insert the workout");
+    if (!result.workout_id) {
+      return res.status(500).send("DB couldnt insert the workout");
     }
-    res
-      .status(200)
-      .send("Sucesfully added the workout send back the ID next time tho");
+    res.status(200).json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -122,14 +144,16 @@ export const addWorkout = async (req, res) => {
 
 export const addWorkoutExercises = async (req, res) => {
   const { workout_id, excerise_id, order_in } = req.body;
-  const numeric_workout_id = Number(workout_id);
-  const numeric_excerise_id = Number(excerise_id);
+
+  const n_workout_id = checkParamIsNum(workout_id);
+  const n_exercise_id = checkParamIsNum(excerise_id);
+  const n_order_in = checkParamIsNum(order_in);
 
   try {
     const result = await workoutService.createWorkoutExercise(
-      numeric_workout_id,
-      numeric_excerise_id,
-      order_in
+      n_workout_id,
+      n_exercise_id,
+      n_order_in
     );
     if (!result || result.length === 0) {
       return res
@@ -155,7 +179,7 @@ export const addExerciseSets = async (req, res) => {
     );
     if (!result || result.length === 0) {
       return res
-        .status(400)
+        .status(500)
         .send("DB not able to create set query but no error");
     }
     res.status(200).json(result);
@@ -185,4 +209,91 @@ export const deleteWorkoutExercise = async (req, res) => {
   }
 };
 
-// jwt will basically sign the payload with a key that you can store in cookies
+export const updateWorkoutById = async (req, res) => {
+  const { sub } = req.user;
+  const { workout_id } = req.params;
+  const { scheduled_date, is_completed } = req.body;
+
+  const numerical_workout_id = Number(workout_id);
+  if (isNaN(numerical_workout_id)) {
+    return res.status(400).json({ error: "Invalid workout_id" });
+  }
+
+  const scheduled_date_val = scheduled_date ? new Date(scheduled_date) : null;
+  const bool_is_completed =
+    typeof is_completed !== "undefined" ? is_completed === "true" : null;
+
+  try {
+    const result = await workoutService.recastWorkoutById(
+      bool_is_completed,
+      scheduled_date_val,
+      numerical_workout_id,
+      sub
+    );
+
+    if (!result) {
+      return res
+        .status(404)
+        .json({ error: "Workout not found or nothing to update" });
+    }
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateWorkoutExercise = async (req, res) => {
+  const { workout_exercise_id } = req.params;
+  const { order_in, exercise_id } = req.body;
+
+  const n_workout_exercise_id = checkParamIsNum(workout_exercise_id);
+  const n_order_in = checkParamIsNum(order_in);
+  const n_exercise_id = checkParamIsNum(exercise_id);
+
+  try {
+    const result = await workoutService.recastWorkoutExercise(
+      n_order_in,
+      n_exercise_id,
+      n_workout_exercise_id
+    );
+    if (result.workout_exercise_id) {
+      return res
+        .status(500)
+        .json({ error: "Unable to update the work exercise" });
+    }
+    console.log(result);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateWorkoutExerciseSet = async (req, res) => {
+  const { sub } = req.user;
+  const { set_id } = req.params;
+  const { weight, reps, comment } = req.body;
+
+  console.log(req.body);
+
+  try {
+    const result = await workoutService.recastWorkoutExerciseSets(
+      weight ?? null,
+      reps ?? null,
+      comment ?? null,
+      sub,
+      set_id
+    );
+
+    if (!result.set_id) {
+      return res.status(404).json({ error: "Set not found or not updated" });
+    }
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
