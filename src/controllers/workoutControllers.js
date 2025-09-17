@@ -108,7 +108,7 @@ export const addWorkout = async (req, res) => {
 
   try {
     const result = await workoutService.createWorkout(sub, scheduled_date);
-    if (result.rowCount == 0) {
+    if (result.length == 0) {
       return res.status(400).send("DB couldnt insert the workout");
     }
     res
@@ -116,7 +116,7 @@ export const addWorkout = async (req, res) => {
       .send("Sucesfully added the workout send back the ID next time tho");
   } catch (err) {
     console.error(err);
-    res.status(404).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -139,7 +139,7 @@ export const addWorkoutExercises = async (req, res) => {
     res.status(200).json(result);
   } catch (err) {
     console.error(err);
-    res.status(404).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -161,7 +161,7 @@ export const addExerciseSets = async (req, res) => {
     res.status(200).json(result);
   } catch (err) {
     console.error(err);
-    res.status(404).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -184,7 +184,5 @@ export const deleteWorkoutExercise = async (req, res) => {
     res.status(404).json({ error: err.message });
   }
 };
-
-const generateReport = async (req, res) => {};
 
 // jwt will basically sign the payload with a key that you can store in cookies

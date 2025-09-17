@@ -15,7 +15,7 @@ const controllerTest = ({
   mockValue,
   expectedStatus,
   expectedJson,
-  reqProps = {}, // can include query, params, body, user
+  reqProps = {},
   reject = false,
 }) => {
   return async () => {
@@ -42,7 +42,7 @@ const controllerTest = ({
     expect(res.status).toHaveBeenCalledWith(expectedStatus);
     if (expectedJson !== undefined)
       expect(res.json).toHaveBeenCalledWith(expectedJson);
-    if (expectedJson === undefined) expect(res.send).toHaveBeenCalled(); // if using send
+    if (expectedJson === undefined) expect(res.send).toHaveBeenCalled();
   };
 };
 
@@ -185,6 +185,19 @@ describe("Workout Controllers", () => {
     })
   );
 
+  //   test(
+  //   "addWorkout returns 404 on no content found",
+  //   controllerTest({
+  //     controller: workoutControllers.addWorkout,
+  //     mockService: workoutService.createWorkout,
+  //     mockValue: new Error("Insert Fail"),
+  //     expectedStatus: 404,
+  //     expectedJson: { error: "Insert Fail" },
+  //     reqProps: { body: { scheduled_date: "2025-09-17" } },
+  //     reject: true,
+  //   })
+  // );
+
   test(
     "addWorkout returns 500 on failure",
     controllerTest({
@@ -198,33 +211,39 @@ describe("Workout Controllers", () => {
     })
   );
 
-  // --- addWorkoutExercises ---
   test(
     "addWorkoutExercises returns 200 on success",
     controllerTest({
       controller: workoutControllers.addWorkoutExercises,
       mockService: workoutService.createWorkoutExercise,
-      mockValue: { workout_exercise_id: 1 },
+      mockValue: {
+        workout_id: 24,
+        excerise_id: 25,
+        order_in: 2,
+      },
       expectedStatus: 200,
-      expectedJson: { workout_exercise_id: 1 },
+      expectedJson: {
+        workout_id: 24,
+        excerise_id: 25,
+        order_in: 2,
+      },
       reqProps: { body: { workout_id: 1, excerise_id: 2, order_in: 1 } },
     })
   );
 
   test(
-    "addWorkoutExercises returns 404 on failure",
+    "addWorkoutExercises returns 500 on failure",
     controllerTest({
       controller: workoutControllers.addWorkoutExercises,
       mockService: workoutService.createWorkoutExercise,
       mockValue: new Error("Insert Fail"),
-      expectedStatus: 404,
+      expectedStatus: 500,
       expectedJson: { error: "Insert Fail" },
       reqProps: { body: { workout_id: 1, excerise_id: 2, order_in: 1 } },
       reject: true,
     })
   );
 
-  // --- addExerciseSets ---
   test(
     "addExerciseSets returns 200 on success",
     controllerTest({
@@ -240,12 +259,12 @@ describe("Workout Controllers", () => {
   );
 
   test(
-    "addExerciseSets returns 404 on failure",
+    "addExerciseSets returns 500 on failure",
     controllerTest({
       controller: workoutControllers.addExerciseSets,
       mockService: workoutService.createExerciseSet,
       mockValue: new Error("Insert Fail"),
-      expectedStatus: 404,
+      expectedStatus: 500,
       expectedJson: { error: "Insert Fail" },
       reqProps: {
         body: { workout_exercise_id: 1, reps: 10, weight: 50, comment: "" },
@@ -254,7 +273,6 @@ describe("Workout Controllers", () => {
     })
   );
 
-  // --- deleteWorkoutExercise ---
   test(
     "deleteWorkoutExercise returns 200 on success",
     controllerTest({
@@ -268,7 +286,7 @@ describe("Workout Controllers", () => {
   );
 
   test(
-    "deleteWorkoutExercise returns 404 on failure",
+    "deleteWorkoutExercise returns 500 on failure",
     controllerTest({
       controller: workoutControllers.deleteWorkoutExercise,
       mockService: workoutService.deleteWorkoutExerciseById,
@@ -280,7 +298,6 @@ describe("Workout Controllers", () => {
     })
   );
 
-  // --- listExerciseWithSets ---
   test(
     "listExerciseWithSets returns data",
     controllerTest({

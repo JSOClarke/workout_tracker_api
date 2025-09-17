@@ -4,17 +4,22 @@ import userRoutes from "./routes/userRoutes.js";
 import dotenv from "dotenv";
 import { authMiddleware } from "../middleware/auth.js";
 import logger from "./config/logger.js";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
+const swaggerSpec = YAML.load("./openapi.yaml");
+
 // // Wrap authMiddleware with unless to exclude login/signup
 // authMiddleware.unless = unless;
 // const protectedMiddleware = authMiddleware.unless({
 //   path: ["/users/login", "/users/signup"],
 // });
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/users", userRoutes);
 
