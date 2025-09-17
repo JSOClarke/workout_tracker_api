@@ -65,7 +65,8 @@ export const login = async (req, res) => {
     }
     console.log("result", result);
 
-    const isMatch = await isPasswordCorrect(password, result.password_hash);
+    const isMatch = await bcrypt.compare(password, result.password_hash);
+    console.log("ismatch", isMatch);
 
     if (!isMatch) {
       return res.status(404).json({ message: "Invalid password" });

@@ -2,8 +2,8 @@ import express from "express";
 import workoutRoutes from "./routes/workoutRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import dotenv from "dotenv";
-import unless from "express-unless";
 import { authMiddleware } from "../middleware/auth.js";
+import logger from "./config/logger.js";
 
 dotenv.config();
 
@@ -23,5 +23,5 @@ app.use("/workouts", authMiddleware, workoutRoutes);
 // app.use("/", workoutRoutes);
 
 app.listen(process.env.PORT, () =>
-  console.log("Server is up on PORT:", process.env.PORT)
+  logger.info("Server is up on PORT:", process.env.PORT)
 );

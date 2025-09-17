@@ -1,12 +1,14 @@
 import * as workoutService from "../services/workoutServices.js";
 
+import logger from "../config/logger.js";
+
 export const testDBConnection = async (req, res) => {
   try {
-    const response = await workoutService.testDb();
+    await workoutService.testDb();
     res.status(200).send("Succesfull connection to the database");
   } catch (err) {
     console.error(err);
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -86,17 +88,17 @@ export const deleteWorkout = async (req, res) => {
     );
 
     if (result.length == 0) {
-      return res.status(400).json({
-        error:
-          "Workout Was not deleted by db query went through and didnt error",
+      return res.status(404).json({
+        error: "No content found",
       });
     }
+    console.log("result length", result.length);
     console.log("result", result);
 
     res.status(200).send("Succefully removed the workout");
   } catch (err) {
     console.error(err);
-    res.status(404).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
