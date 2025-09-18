@@ -60,7 +60,7 @@ export const login = async (req, res) => {
   try {
     const result = await userServices.getUser(email);
     if (!result || !result.user_id) {
-      return res.status(500).json({ error: "No user returned from database" });
+      return res.status(401).json({ error: "No email found for this user" });
     }
 
     const isMatch = await bcrypt.compare(password, result.password_hash);
