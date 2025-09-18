@@ -9,5 +9,6 @@ export const createSignup = async (name, email, password_hash) => {
 export const getUser = async (email) => {
   const query = `SELECT * FROM users WHERE email=$1`;
   const result = await pool.query(query, [email]);
+  console.log(result);
   return result.rows[0];
 };

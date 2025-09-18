@@ -6,10 +6,13 @@ import { authMiddleware } from "../middleware/auth.js";
 import logger from "./config/logger.js";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 const swaggerSpec = YAML.load("./openapi.yaml");
@@ -30,3 +33,5 @@ app.use("/workouts", authMiddleware, workoutRoutes);
 app.listen(process.env.PORT, () =>
   logger.info("Server is up on PORT:", process.env.PORT)
 );
+
+export default app;
