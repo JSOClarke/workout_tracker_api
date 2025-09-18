@@ -1,4 +1,5 @@
 import * as workoutService from "../services/workoutServices.js";
+import { z } from "zod";
 
 const checkParamIsNum = (param) => {
   const numeric_param = Number(param);
@@ -18,12 +19,27 @@ export const testDBConnection = async (req, res) => {
   }
 };
 
+const workoutsSchema = z
+  .object({
+    is_completed: z
+      .string()
+      .optional()
+      .refine((val) => val === "true" || val === "false" || val === undefined),
+  })
+  .strict();
+
 export const listWorkouts = async (req, res) => {
+  const parsed = workoutsSchema.safeParse(req.query);
+  console.log("parsed", parsed);
   let result;
   const { sub } = req.user;
+
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid query parameters" });
+  }
+
   const { is_completed } = req.query;
 
-  console.log(typeof is_completed);
   try {
     if (typeof is_completed !== "undefined") {
       const boolean_is_completed = is_completed === "true";
@@ -43,12 +59,16 @@ export const listWorkouts = async (req, res) => {
   }
 };
 
+// const listWorkoutExercisesSchema = z.object({
+//   workout_id:z.number
+// })
+
 export const listWorkoutExercises = async (req, res) => {
   const { sub } = req.user;
   const { workout_id } = req.params;
 
   if (!workout_id) {
-    return res.status(404).json({ error: "No workout_id provided as param" });
+    return res.status(400).json({ error: "No workout_id provided as param" });
   }
 
   try {
